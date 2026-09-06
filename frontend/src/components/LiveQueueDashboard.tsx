@@ -158,7 +158,7 @@ export const LiveQueueDashboard: React.FC = () => {
           </button>
 
           <a
-            href="http://localhost:4000/admin/queues?token=admin-reachinbox-secret-token"
+            href={`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/admin/queues?token=admin-reachinbox-secret-token`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-[#00A859] hover:bg-[#00924D] text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center space-x-1.5 transition shadow-sm cursor-pointer"

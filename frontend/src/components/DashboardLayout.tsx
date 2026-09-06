@@ -184,7 +184,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   </div>
                 </button>
                 <a
-                  href="http://localhost:4000/admin/queues?token=admin-reachinbox-secret-token"
+                  href={`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/admin/queues?token=admin-reachinbox-secret-token`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between px-3 py-2 text-xs text-gray-700 hover:bg-[#F3F4F6] rounded-xl transition"

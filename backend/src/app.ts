@@ -9,8 +9,8 @@ import { adminDashboardAuth, queueDashboardRouter } from './queues/dashboard';
 
 const app: Application = express();
 
-// Trust proxy in production for secure cookies behind reverse proxies
-if (env.NODE_ENV === 'production') {
+// Trust proxy in production / cloud reverse proxies (e.g. Render)
+if (env.NODE_ENV === 'production' || process.env.RENDER === 'true') {
   app.set('trust proxy', 1);
 }
 
