@@ -13,7 +13,11 @@
     "dev:frontend": "npm run dev --workspace=frontend",
     "build:backend": "npm run build --workspace=backend",
     "build:frontend": "npm run build --workspace=frontend",
-    "build": "npm run build:backend && npm run build:frontend"
+    "build": "npm run build:backend",
+    "build:all": "npm run build:backend && npm run build:frontend",
+    "start": "npm run start --workspace=backend",
+    "start:worker": "npm run start:worker --workspace=backend",
+    "start:all": "npm run start:all --workspace=backend"
   },
   "keywords": [],
   "author": "",
