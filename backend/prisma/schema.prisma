@@ -1,0 +1,99 @@
+// =================================================================================================
+// Architecture & Concurrency Design Notes:
+//
+// 1. ScheduledEmail.jobId (Unique Constraint & Idempotency):
+//    - BullMQ job IDs map 1:1 to ScheduledEmail.jobId.
+//    - The unique constraint prevents duplicate jobs from being scheduled for the same email intent.
+//    - When the application or worker restarts, recovery routines inspect the database and Redis to reconcile
+//      jobs without double-scheduling or dispatching duplicate emails (strictly satisfying no-duplicate sends).
+//
+// 2. RateLimitCounter keyed by (senderId, hourWindow):
+//    - In a distributed multi-worker environment, in-memory counters lead to race conditions, split-brain states,
+//      and counter loss on worker crashes.
+//    - Persisting rate limits in Postgres keyed by `@@unique([senderId, hourWindow])` (with hourWindow truncated
+//      to the top of the hour) guarantees centralized, atomic, and persistent sender rate-limiting across all
+//      concurrent BullMQ worker instances.
+// =================================================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String            @id @default(uuid())
+  googleId         String            @unique
+  email            String            @unique
+  name             String
+  avatarUrl        String?
+  createdAt        DateTime          @default(now())
+  senders          Sender[]
+  slackIntegration SlackIntegration?
+}
+
+model Sender {
+  id                String             @id @default(uuid())
+  userId            String
+  user              User               @relation(fields: [userId], references: [id])
+  name              String
+  smtpUser          String
+  smtpPass          String
+  createdAt         DateTime           @default(now())
+  emails            ScheduledEmail[]
+  rateLimitCounters RateLimitCounter[]
+}
+
+model ScheduledEmail {
+  id           String      @id @default(uuid())
+  senderId     String
+  sender       Sender      @relation(fields: [senderId], references: [id])
+  toEmail      String
+  subject      String
+  body         String      @db.Text
+  scheduledFor DateTime
+  delayMs      Int
+  hourlyLimit  Int
+  status       EmailStatus @default(SCHEDULED)
+  jobId        String?     @unique // BullMQ job id, used for idempotency + restart recovery
+  attempts     Int         @default(0)
+  errorMessage String?
+  sentAt       DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([status])
+  @@index([scheduledFor])
+}
+
+enum EmailStatus {
+  SCHEDULED
+  QUEUED
+  SENDING
+  SENT
+  FAILED
+  RESCHEDULED
+}
+
+model RateLimitCounter {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     Sender   @relation(fields: [senderId], references: [id])
+  hourWindow DateTime // truncated to the top of the hour, e.g. 2026-09-06T14:00:00Z
+  count      Int      @default(0)
+
+  @@unique([senderId, hourWindow])
+}
+
+model SlackIntegration {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  webhookUrl  String
+  teamName    String
+  accessToken String
+  createdAt   DateTime @default(now())
+}
