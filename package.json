@@ -11,13 +11,18 @@
     "dev:backend": "npm run dev --workspace=backend",
     "worker": "npm run worker --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
+    "prisma:generate": "prisma generate --schema=backend/prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate deploy --schema=backend/prisma/schema.prisma",
     "build:backend": "npm run build --workspace=backend",
     "build:frontend": "npm run build --workspace=frontend",
-    "build": "npm run build:backend",
+    "build": "npm run prisma:generate && npm run build:backend",
     "build:all": "npm run build:backend && npm run build:frontend",
     "start": "npm run start --workspace=backend",
     "start:worker": "npm run start:worker --workspace=backend",
     "start:all": "npm run start:all --workspace=backend"
+  },
+  "prisma": {
+    "schema": "backend/prisma/schema.prisma"
   },
   "keywords": [],
   "author": "",

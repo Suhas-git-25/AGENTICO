@@ -21,6 +21,7 @@
     "prisma:migrate": "prisma migrate dev"
   },
   "prisma": {
+    "schema": "prisma/schema.prisma",
     "seed": "ts-node-dev prisma/seed.ts"
   },
   "dependencies": {
