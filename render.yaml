@@ -12,9 +12,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: BACKEND_URL
-        value: https://email-scheduler-25c2.onrender.com
+        value: https://email-scheduler-1-4fts.onrender.com
       - key: FRONTEND_URL
-        value: http://localhost:3000
+        value: https://frontend-henna-five-tzw5v7gl72.vercel.app
       - key: DATABASE_URL
         sync: false
       - key: REDIS_URL
